@@ -198,7 +198,7 @@
       const currentdate = new Date();
       const sensorTime = Date.parse(st);
       const difference = Math.abs(sensorTime - currentdate);
-      console.log(difference);
+      // console.log(difference);
       if (difference > 1000 * 60 * 60 * 10) {
         return "red";
       } else {
@@ -262,7 +262,7 @@
       }
     },
     mounted: function () {
-      this.updateMap([]);
+      // this.updateMap([]);
       this.$root.$on("updateMap", (sensors) => {
         this.updateMap(sensors);
       });

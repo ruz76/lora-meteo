@@ -6,7 +6,7 @@
       title="LoRa"
     >
 
-      <Sensors class="d-none d-md-none d-lg-flex"/>
+      <Sensors v-if="history" class="d-none d-md-none d-lg-flex"/>
 
       <template slot="links">
         <sidebar-item
@@ -56,6 +56,15 @@
       return {
         sidebarBackground: 'vue' //vue|blue|orange|green|red|primary
       };
+    },
+    computed: {
+      history() {
+        if(this.$route.path.includes('dashboard')) {
+          return true
+        } else {
+          return false
+        }
+      }
     },
     methods: {
       toggleSidebar() {
