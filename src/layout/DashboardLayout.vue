@@ -8,24 +8,25 @@
 
       <Sensors class="d-none d-md-none d-lg-flex"/>
 
-<!--      <template slot="links">-->
-<!--        <sidebar-item-->
-<!--          :link="{-->
-<!--            name: 'History',-->
-<!--            icon: 'ni ni-tv-2 text-primary',-->
-<!--            path: '/dashboard'-->
-<!--          }"-->
-<!--        />-->
+      <template slot="links">
+        <sidebar-item
+          :link="{
+            name: 'Historie',
+            icon: 'ni ni-tv-2 text-primary',
+            path: '/dashboard'
+          }"
+        />
 
-<!--        <sidebar-item-->
-<!--            :link="{-->
-<!--            name: 'Realtime',-->
-<!--            icon: 'ni ni-tv-2 text-primary',-->
-<!--            path: '/realtime'-->
-<!--          }"-->
-<!--        />-->
+        <sidebar-item
+            :link="{
+            name: 'Aktuálně',
+            icon: 'ni ni-tv-2 text-primary',
+            path: '/realtime'
+          }"
+        />
 
-<!--      </template>-->
+      </template>
+
     </side-bar>
     <div class="main-content" :data="sidebarBackground">
 <!--      <dashboard-navbar></dashboard-navbar>-->

@@ -2,10 +2,10 @@
   <div id="mapapp" :class="[$options.name]">
     <!-- app map -->
     <vl-map v-if="mapVisible" class="map" ref="map" :load-tiles-while-animating="true" :load-tiles-while-interacting="true"
-            @click="clickCoordinate = $event.coordinate" @postcompose="onMapPostCompose"
+            @postcompose="onMapPostCompose"
             data-projection="EPSG:4326" @mounted="onMapMounted">
       <!-- map view aka ol.View -->
-      <vl-view ref="view" :center.sync="center" :zoom.sync="zoom" :rotation.sync="rotation" v-on:update:center="sendExtent" v-on:update:zoom="sendExtent"></vl-view>
+      <vl-view ref="view" :center.sync="center" :zoom.sync="zoom" :rotation.sync="rotation"></vl-view>
 
       <!-- base layers -->
       <vl-layer-tile v-for="layer in baseLayers" :key="layer.name" :id="layer.name" :visible="layer.visible">
@@ -22,6 +22,11 @@
                       v-for="feature in layer.source.staticFeatures" :key="feature.id"
                       :id="feature.id" :properties="feature.properties">
             <component :is="geometryTypeToCmpName(feature.geometry.type)" v-bind="feature.geometry"></component>
+            <vl-style-box>
+              <vl-style-fill color="white"></vl-style-fill>
+              <vl-style-stroke color="yellow"></vl-style-stroke>
+              <vl-style-text :text="feature.properties.label" font="10px monospace"></vl-style-text>
+            </vl-style-box>
           </vl-feature>
 
           <!-- add inner source if provided (like vl-source-vector inside vl-source-cluster) -->
@@ -29,7 +34,7 @@
             <!-- add static features to vl-source-vector if provided -->
             <vl-feature v-if="layer.source.source.staticFeatures && layer.source.source.staticFeatures.length"
                         v-for="feature in layer.source.source.staticFeatures" :key="feature.id"
-                        :id="feature.id" :properties="feature.properties">
+                        :id="feature.id" :properties="feature.properties" @click="showInfo(feature.properties)">
               <component :is="geometryTypeToCmpName(feature.geometry.type)" v-bind="feature.geometry"></component>
             </vl-feature>
           </component>
@@ -50,6 +55,77 @@
       </component>
       <!--// other layers -->
 
+      <!-- interactions -->
+<!--      <vl-interaction-select-->
+<!--          :features.sync="selectedFeatures">-->
+<!--        <template slot-scope="selection">-->
+<!--          &lt;!&ndash; select styles &ndash;&gt;-->
+<!--          <vl-style>-->
+<!--            <vl-style-stroke-->
+<!--                color="#423e9e"-->
+<!--                :width="7" />-->
+<!--            <vl-style-fill-->
+<!--                :color="[254, 178, 76, 0.7]"/>-->
+<!--            <vl-style-circle :radius="5">-->
+<!--              <vl-style-stroke-->
+<!--                  color="#423e9e"-->
+<!--                  :width="7"/>-->
+<!--              <vl-style-fill-->
+<!--                  :color="[254, 178, 76, 0.7]"/>-->
+<!--            </vl-style-circle>-->
+<!--          </vl-style>-->
+<!--          <vl-style :z-index="1">-->
+<!--            <vl-style-stroke-->
+<!--                color="#d43f45"-->
+<!--                :width="2"/>-->
+<!--            <vl-style-circle :radius="5">-->
+<!--              <vl-style-stroke-->
+<!--                  color="#d43f45"-->
+<!--                  :width="2"/>-->
+<!--            </vl-style-circle>-->
+<!--          </vl-style>-->
+<!--          &lt;!&ndash;// select styles &ndash;&gt;-->
+
+<!--          &lt;!&ndash; selected feature popup &ndash;&gt;-->
+<!--          <vl-overlay-->
+<!--              v-for="feature in select.features"-->
+<!--              :key="feature.id"-->
+<!--              :id="feature.id"-->
+<!--              class="feature-popup"-->
+<!--              :position="pointOnSurface(feature.geometry)"-->
+<!--              :auto-pan="true"-->
+<!--              :auto-pan-animation="{ duration: 300 }">-->
+<!--            <template slot-scope="popup">-->
+<!--              <section class="card">-->
+<!--                <header class="card-header">-->
+<!--                  <p class="card-header-title">-->
+<!--                    Feature ID {{ feature.id }}-->
+<!--                  </p>-->
+<!--                  <a class="card-header-icon" title="Close"-->
+<!--                     @click="selectedFeatures = selectedFeatures.filter(f => f.id !== feature.id)">-->
+<!--                    <b-icon icon="close"></b-icon>-->
+<!--                  </a>-->
+<!--                </header>-->
+<!--                <div class="card-content">-->
+<!--                  <div class="content">-->
+<!--                    <p>-->
+<!--                      Overlay popup content for Feature with ID <strong>{{ feature.id }}</strong>-->
+<!--                    </p>-->
+<!--                    <p>-->
+<!--                      Popup: {{ JSON.stringify(popup) }}-->
+<!--                    </p>-->
+<!--                    <p>-->
+<!--                      Feature: {{ JSON.stringify({ id: feature.id, properties: feature.properties }) }}-->
+<!--                    </p>-->
+<!--                  </div>-->
+<!--                </div>-->
+<!--              </section>-->
+<!--            </template>-->
+<!--          </vl-overlay>-->
+<!--          &lt;!&ndash;// selected popup &ndash;&gt;-->
+<!--        </template>-->
+<!--      </vl-interaction-select>-->
+
     </vl-map>
 
   </div>
@@ -57,27 +133,22 @@
 
 <script>
 
-  import {kebabCase, range, random, camelCase} from 'lodash'
+  import {kebabCase, camelCase} from 'lodash'
   import {createStyle} from 'vuelayers/lib/ol-ext'
   import ScaleLine from 'ol/control/ScaleLine'
   import FullScreen from 'ol/control/FullScreen'
   import ZoomSlider from 'ol/control/ZoomSlider'
 
-  import VueLayers from 'vuelayers'
-
   const methods = {
     camelCase,
-    sendExtent(any) {
-      this.$root.$emit('setMapExtent', this.$refs.view.$view.calculateExtent());
-    },
     geometryTypeToCmpName(type) {
       return 'vl-geom-' + kebabCase(type)
     },
+    showInfo(properties) {
+      console.log(properties);
+    },
     selectFilter(feature) {
       return ['position-feature'].indexOf(feature.getId()) === -1
-    },
-    onUpdatePosition(coordinate) {
-      this.deviceCoordinate = coordinate
     },
     onMapPostCompose({vectorContext, frameState}) {
       if (!this.$refs.marker || !this.$refs.marker.$feature) {
@@ -122,96 +193,22 @@
         new ZoomSlider(),
       ])
     },
-    // base layers
-    showBaseLayer(name) {
-      let layer = this.baseLayers.find(layer => layer.visible)
-      if (layer != null) {
-        layer.visible = false
-      }
-
-      layer = this.baseLayers.find(layer => layer.name === name)
-      if (layer != null) {
-        layer.visible = true
-      }
-    },
-    updateMap: function () {
-      if (this.sensor.lon !== undefined && this.sensor.lon.length > 0) {
-        let last = this.sensor.lon.length - 1;
-        if (this.maptype === "realtime") {
-          this.drawCircles(this.sensor.lon, this.sensor.lat, this.sensor.avg_distance_error);
-          this.drawCircle(this.sensor.lon[0], this.sensor.lat[0], this.sensor.avg_distance_error[0]);
-          if (this.$store.state.mapmove) {
-            this.center = [this.sensor.lon[0], this.sensor.lat[0]];
-            this.zoom = 15;
-          }
-        }
-        if (this.maptype === "history") {
-          switch (this.statType) {
-            case 'avg':
-              this.drawCircles(this.sensor.lon, this.sensor.lat, this.sensor.avg_distance_error);
-              this.drawCircle(this.sensor.lon[last], this.sensor.lat[last], this.sensor.avg_distance_error[last]);
-              break;
-            case 'min':
-              this.drawCircles(this.sensor.lon, this.sensor.lat, this.sensor.min_distance_error);
-              this.drawCircle(this.sensor.lon[last], this.sensor.lat[last], this.sensor.min_distance_error[last]);
-              break;
-            case 'max':
-              this.drawCircles(this.sensor.lon, this.sensor.lat, this.sensor.max_distance_error);
-              this.drawCircle(this.sensor.lon[last], this.sensor.lat[last], this.sensor.max_distance_error[last]);
-              break;
-            default:
-              this.drawCircles(this.sensor.lon, this.sensor.lat, this.sensor.avg_distance_error);
-              this.drawCircle(this.sensor.lon[last], this.sensor.lat[last], this.sensor.avg_distance_error[last]);
-          }
-          if (this.$store.state.mapmove) {
-            this.center = [this.sensor.lon[last], this.sensor.lat[last]];
-            this.zoom = 15;
-          }
-        }
-      }
-    },
-    getStat() {
-      switch (this.statType) {
-        case 'avg':
-          return this.sensor.avg_distance_error.reduce(function (p, c, i, a) {
-            return p + (c / a.length)
-          }, 0);
-        case 'min':
-          return Math.min(...this.sensor.min_distance_error);
-        case 'max':
-          return Math.max(...this.sensor.max_distance_error);
-        default:
-          return this.sensor.avg_distance_error.reduce(function (p, c, i, a) {
-            return p + (c / a.length)
-          }, 0);
-      }
-    },
-    drawCircle(lon, lat, radius) {
-      let source = {
-        cmp: 'vl-source-vector',
-        staticFeatures: [{
-          type: 'Feature',
-          id: 'sensor-error-last',
-          geometry: {
-            type: 'Circle',
-            coordinates: [lon, lat],
-            radius: radius,
-          }
-        }]
-      }
-      this.layers[1].source = source;
-      this.layers[1].visible = true;
-    },
-    drawCircles(lon, lat, radius) {
+    updateMap: function (sensors) {
+      // this.drawCircles([18.09250, 18.09350],[49.84162, 49.84162], [100, 200])
       let features = [];
-      for (let i = 0; i < radius.length; i++) {
+      for (let i = 0; i < sensors.length; i++) {
         let feature = {
           type: 'Feature',
           id: 'sensor-error-' + i,
           geometry: {
             type: 'Circle',
-            coordinates: [lon[i], lat[i]],
-            radius: radius[i],
+            coordinates: [sensors[i].lon, sensors[i].lat],
+            radius: 100,
+          },
+          properties: {
+            "label": sensors[i].temp + '°C\n' + sensors[i].time.substring(11, 16),
+            "temp": sensors[i].temp,
+            "time": sensors[i].time
           }
         }
         features.push(feature);
@@ -239,50 +236,33 @@
       }
     },
     methods,
-    mounted: function () {
-      this.updateMap();
-      this.$root.$on("updateMap", (type) => {
-        this.statType = type;
-        this.updateMap();
-      });
-    },
-    watch: {
-      sensor: function (newVal) {
-        this.sensor = newVal;
-        this.updateMap();
+    computed: {
+      label(properties) {
+        return properties.temp;
       }
+    },
+    mounted: function () {
+      this.updateMap([]);
+      this.$root.$on("updateMap", (sensors) => {
+        this.updateMap(sensors);
+      });
     },
     data() {
       return {
         statType: 'avg',
         name: '',
         nameState: null,
-        submittedNames: [],
-        center: [0, 0],
-        zoom: 2,
+        selectedFeatures: [],
+        center: [18.09168, 49.84150],
+        zoom: 15,
         rotation: 0,
         clickCoordinate: undefined,
-        selectedFeatures: [],
         deviceCoordinate: undefined,
         mapPanel: {
           tab: 'draw',
         },
         panelOpen: true,
         mapVisible: true,
-        drawControls: [
-          {
-            type: 'polygon',
-            label: 'Draw',
-            icon: 'square-o',
-          },
-          {
-            type: undefined,
-            label: 'Finish',
-            icon: 'times',
-          },
-        ],
-        drawType: undefined,
-        drawnFeatures: [],
         // base layers
         baseLayers: [
           {
@@ -313,31 +293,6 @@
                   'vl-style-stroke': {
                     color: '#219e46',
                     width: 2,
-                  },
-                },
-              },
-            ],
-          },
-          {
-            id: 'circle-last',
-            title: 'Circle-last',
-            cmp: 'vl-layer-vector',
-            renderMode: "image",
-            visible: false,
-            source: {
-              cmp: 'vl-source-vector',
-              staticFeatures: [],
-            },
-            style: [
-              {
-                cmp: 'vl-style-box',
-                styles: {
-                  'vl-style-fill': {
-                    color: [255, 0, 0, 0],
-                  },
-                  'vl-style-stroke': {
-                    color: '#ff0000',
-                    width: 4,
                   },
                 },
               },
