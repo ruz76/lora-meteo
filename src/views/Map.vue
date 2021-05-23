@@ -24,8 +24,9 @@
             <component :is="geometryTypeToCmpName(feature.geometry.type)" v-bind="feature.geometry"></component>
             <vl-style-box>
               <vl-style-fill color="white"></vl-style-fill>
-              <vl-style-stroke color="yellow"></vl-style-stroke>
-              <vl-style-text :text="feature.properties.label" font="10px monospace"></vl-style-text>
+              <vl-style-stroke :color="feature.properties.stroke_color"></vl-style-stroke>
+              <vl-style-text v-if="zoom > 14 && zoom < 16" :text="feature.properties.label" font="10px monospace"></vl-style-text>
+              <vl-style-text v-if="zoom > 15" :text="feature.properties.label_ext" font="10px monospace"></vl-style-text>
             </vl-style-box>
           </vl-feature>
 
@@ -193,22 +194,41 @@
         new ZoomSlider(),
       ])
     },
+    getStrokeColor(st) {
+      const currentdate = new Date();
+      const sensorTime = Date.parse(st);
+      const difference = Math.abs(sensorTime - currentdate);
+      console.log(difference);
+      if (difference > 1000 * 60 * 60 * 10) {
+        return "red";
+      } else {
+        return "green";
+      }
+    },
     updateMap: function (sensors) {
       // this.drawCircles([18.09250, 18.09350],[49.84162, 49.84162], [100, 200])
       let features = [];
       for (let i = 0; i < sensors.length; i++) {
+        let id = i + 1;
+        if (id < 10) {
+          id = "0" + id;
+        }
         let feature = {
           type: 'Feature',
           id: 'sensor-error-' + i,
           geometry: {
             type: 'Circle',
             coordinates: [sensors[i].lon, sensors[i].lat],
-            radius: 100,
+            radius: 120,
           },
           properties: {
             "label": sensors[i].temp + '°C\n' + sensors[i].time.substring(11, 16),
+            "label_ext": "ID: " + id + "\n" + sensors[i].temp + '°C\n' + sensors[i].hum + '%\n' + sensors[i].time.substring(11, 16),
+            "hum": sensors[i].hum,
+            "bat": sensors[i].bat,
             "temp": sensors[i].temp,
-            "time": sensors[i].time
+            "time": sensors[i].time,
+            "stroke_color": this.getStrokeColor(sensors[i].time),
           }
         }
         features.push(feature);
