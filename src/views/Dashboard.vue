@@ -1,15 +1,15 @@
 <template>
   <div>
-    <div>
-      <base-header type="gradient-success" class="pb-2 pb-2 pt-5 pt-md-8">
-      </base-header>
-    </div>
-    <div class="container-fluid">
+<!--    <div>-->
+<!--      <base-header type="gradient-success" class="pb-20 pt-5 pt-md-5">-->
+<!--      </base-header>-->
+<!--    </div>-->
+    <div class="container-fluid mt-100">
       <!--Tables-->
       <div class="row">
         <div class="col-xl-12 mb-5 mb-xl-0">
           <!--Charts-->
-          <div class="container-fluid mt--7">
+          <div class="container-fluid mt-2">
             <div class="row">
               <div class="col-xl-12 mb-12 mb-xl-0">
                 <card type="default" header-classes="bg-transparent">
@@ -25,10 +25,10 @@
                       :key="sliderkey"
                   />
                   <div>
-                    <b-button @click="setMonth(2)">Únor</b-button>
-                    <b-button @click="setMonth(3)">Březen</b-button>
-                    <b-button @click="setMonth(4)">Duben</b-button>
-                    <b-button @click="setMonth(5)">Květen</b-button>
+                    <b-button size="sm" @click="setMonth(2)">Únor</b-button>
+                    <b-button size="sm" @click="setMonth(3)">Březen</b-button>
+                    <b-button size="sm" @click="setMonth(4)">Duben</b-button>
+                    <b-button size="sm" @click="setMonth(5)">Květen</b-button>
                   </div>
                 </card>
               </div>
@@ -75,20 +75,13 @@
   import axios from "axios";
   import * as chartConfigs from '@/components/Charts/config';
   import LineChart from '@/components/Charts/LineChart';
-  import BarChart from '@/components/Charts/BarChart';
 
   // Tables
-  import SocialTrafficTable from './Dashboard/SocialTrafficTable';
-  import PageVisitsTable from './Dashboard/PageVisitsTable';
-  import Map from './Map.vue';
+  // import Map from './Map.vue';
 
   export default {
     components: {
-      LineChart,
-      BarChart,
-      PageVisitsTable,
-      SocialTrafficTable,
-      Map,
+      LineChart
     },
     data() {
       return {
@@ -200,7 +193,7 @@
     },
     methods: {
       timeLevelStatus(index) {
-        console.log('AAAA', index, this.currentTimeLevel);
+        // console.log('AAAA', index, this.currentTimeLevel);
         return this.currentTimeLevelIndex === index ? 'success' : 'secondary';
       },
       statTypeStatus(type) {
@@ -208,7 +201,7 @@
         return this.statType === type ? 'success' : 'secondary';
       },
       switchToTimeLevel(index) {
-        console.log(index);
+        // console.log(index);
         this.currentTimeLevelIndex = index;
         this.currentTimeLevel = this.timelevels[index];
         this.sliderkey = this.sliderkey + 1;
@@ -315,13 +308,13 @@
             default:
               datetocheck = this.currentYear + "-" + this.currentMonth + "-" + Math.round(this.dateSlider);
           }
-          console.log(datetocheck);
+          // console.log(datetocheck);
           this.getSensors(this.currentDate);
         }
       },
       getSensors(date) {
         var current_component = this;
-        console.log(date);
+        // console.log(date);
         let year = date.split('-')[0];
         let month = parseInt(date.split('-')[1]);
         let day = parseInt(date.split('-')[2]);
@@ -380,7 +373,8 @@
         .catch(function (error) {
           // console.log(error);
           // current_component.error = error;
-          current_component.error = "Pro vybraný den nemám data.";
+          // let a = error;
+          current_component.error = "Pro vybraný den nemám data: " + error;
           current_component.activeSensor.measured = [];
           current_component.activeSensor.times = [];
           current_component.initMeasuredChart();

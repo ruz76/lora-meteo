@@ -112,7 +112,7 @@ function chartOptions(Chart) {
       drawBorder: false,
       drawTicks: false,
       lineWidth: 0,
-      zeroLineWidth: 0,
+      zeroLineWidth: 1,
       zeroLineColor: (mode == 'dark') ? colors.gray[900] : colors.gray[300],
       zeroLineBorderDash: [2],
       zeroLineBorderDashOffset: [2]

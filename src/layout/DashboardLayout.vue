@@ -6,7 +6,7 @@
       title="LoRa"
     >
 
-      <Sensors/>
+      <Sensors class="d-none d-md-none d-lg-flex"/>
 
 <!--      <template slot="links">-->
 <!--        <sidebar-item-->
@@ -41,14 +41,12 @@
   </div>
 </template>
 <script>
-  import DashboardNavbar from './DashboardNavbar.vue';
   import ContentFooter from './ContentFooter.vue';
   import { FadeTransition } from 'vue2-transitions';
   import Sensors from './Sensors.vue';
 
   export default {
     components: {
-      DashboardNavbar,
       ContentFooter,
       FadeTransition,
       Sensors

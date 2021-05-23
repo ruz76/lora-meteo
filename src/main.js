@@ -44,8 +44,8 @@ const store = new Vuex.Store({
     count: 0,
     statType: 'avg',
     activeSensor: null,
-    // serviceUrl: "http://lora.vsb.cz/loraloc/meteo/",
-    serviceUrl: "http://localhost:8080/meteo/",
+    serviceUrl: "http://lora.vsb.cz/loraloc/meteo/",
+    // serviceUrl: "http://localhost:8080/meteo/",
     mapmove: true
   },
   mutations: {

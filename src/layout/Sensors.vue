@@ -1,11 +1,11 @@
 <template>
     <div>
-        <div><p>Senzory</p></div>
         <div>
+          <p>Senzory</p>
         <vue-tree-list
           @click="onClick"
           :model="data"
-          v-bind:default-expanded="true">
+          v-bind:default-expanded="false">
         </vue-tree-list>
         </div>
     </div>
