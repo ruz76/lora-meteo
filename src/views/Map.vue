@@ -25,7 +25,8 @@
             <vl-style-box>
               <vl-style-fill color="white"></vl-style-fill>
               <vl-style-stroke :color="feature.properties.stroke_color"></vl-style-stroke>
-              <vl-style-text v-if="zoom > 14 && zoom < 16" :text="feature.properties.label" font="10px monospace"></vl-style-text>
+              <vl-style-text v-if="zoom < 15 && zoom > 13" :text="feature.properties.label_small" font="10px monospace"></vl-style-text>
+              <vl-style-text v-if="zoom == 15" :text="feature.properties.label" font="10px monospace"></vl-style-text>
               <vl-style-text v-if="zoom > 15" :text="feature.properties.label_ext" font="10px monospace"></vl-style-text>
             </vl-style-box>
           </vl-feature>
@@ -222,6 +223,7 @@
             radius: 120,
           },
           properties: {
+            "label_small": sensors[i].temp.split('.')[0],
             "label": sensors[i].temp + '°C\n' + sensors[i].time.substring(11, 16),
             "label_ext": "ID: " + id + "\n" + sensors[i].temp + '°C\n' + sensors[i].hum + '%\n' + sensors[i].time.substring(11, 16),
             "hum": sensors[i].hum,

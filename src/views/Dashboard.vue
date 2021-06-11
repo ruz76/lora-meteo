@@ -25,10 +25,11 @@
                       :key="sliderkey"
                   />
                   <div>
-                    <b-button size="sm" @click="setMonth(2)">Únor</b-button>
-                    <b-button size="sm" @click="setMonth(3)">Březen</b-button>
-                    <b-button size="sm" @click="setMonth(4)">Duben</b-button>
-                    <b-button size="sm" @click="setMonth(5)">Květen</b-button>
+                    <b-button class="m-1" size="sm" @click="setMonth(2)">Únor</b-button>
+                    <b-button class="m-1" size="sm" @click="setMonth(3)">Březen</b-button>
+                    <b-button class="m-1" size="sm" @click="setMonth(4)">Duben</b-button>
+                    <b-button class="m-1" size="sm" @click="setMonth(5)">Květen</b-button>
+                    <b-button class="m-1" size="sm" @click="setMonth(6)">Červen</b-button>
                   </div>
                 </card>
               </div>
@@ -56,6 +57,19 @@
                   >
                   </line-chart>
 
+                </card>
+              </div>
+
+            </div>
+            <div class="row">
+              <div class="col-xl-12 mb-12 mb-xl-0">
+                <card type="default" header-classes="bg-transparent">
+                  <div slot="header" class="row align-items-center">
+                    <div class="col">
+                      <h6 class="text-light text-uppercase ls-1 mb-1">Stažení dat</h6>
+                      <p><a :href="urlData" target="_blank">Hodnoty pro vybraný den (SSV)</a></p>
+                    </div>
+                  </div>
                 </card>
               </div>
 
@@ -91,8 +105,8 @@
         currentTimeLevel: "month",
         timelevels: ["year", "month", "day", "hour", "minute"],
         currentYear: 2021,
-        currentMonth: 5,
-        currentDay: 15,
+        currentMonth: this.getStartMonth(),
+        currentDay: this.getStartDay(),
         currentHour: 12,
         currentMinute: 30,
         currentSecond: 30,
@@ -111,8 +125,8 @@
         activeSensorId: 0,
         activeSensor: {title: "", info: ""},
         statType: 'avg',
-        dateSliderBefore: 15,
-        dateSlider: 15,
+        dateSliderBefore: this.getStartDay(),
+        dateSlider: this.getStartDay(),
         timeLevelSliderBefore: 0,
         timeLevelSlider: 0,
         timeLevelSliderRange: {min: 0, max: 4},
@@ -133,6 +147,20 @@
       };
     },
     computed: {
+      urlData: function() {
+        let date = this.currentDate;
+        let year = date.split('-')[0];
+        let month = parseInt(date.split('-')[1]);
+        let day = parseInt(date.split('-')[2]);
+        if (month < 10) {
+          month = '0' + month;
+        }
+        if (day < 10) {
+          day = '0' + day;
+        }
+        let sensorTitle = this.sensors[this.activeSensorId].title;
+        return this.$store.state.serviceUrl + "th" + sensorTitle + "/" + year + "/" + month + "/" + day + "/data.csv"
+      },
       // a computed getter
       dateSliderRangeComputed: function () {
         switch (this.currentTimeLevel) {
@@ -192,6 +220,16 @@
       }
     },
     methods: {
+      getStartMonth() {
+        let yesterday = new Date(new Date().setDate(new Date().getDate()-1));
+        // console.log(yesterday.getMonth() + 1);
+        return yesterday.getMonth() + 1;
+      },
+      getStartDay() {
+        let yesterday = new Date(new Date().setDate(new Date().getDate()-1));
+        // console.log(yesterday.getDate());
+        return yesterday.getDate();
+      },
       timeLevelStatus(index) {
         // console.log('AAAA', index, this.currentTimeLevel);
         return this.currentTimeLevelIndex === index ? 'success' : 'secondary';

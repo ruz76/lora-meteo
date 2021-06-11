@@ -5,7 +5,7 @@
         <div class="col-xl-12 mb-5 mb-xl-0 mt-2">
           <div class="mt++10">
             <Map :sensors="sensors"/>
-            <p>Hodnoty jsou načítány každých 10 minut. Poslední aktualizace {{currentDate}}</p>
+<!--            <p>Hodnoty jsou načítány každých 10 minut. Poslední aktualizace {{currentDate}}</p>-->
           </div>
         </div>
       </div>
