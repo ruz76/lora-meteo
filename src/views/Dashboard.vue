@@ -67,7 +67,8 @@
                   <div slot="header" class="row align-items-center">
                     <div class="col">
                       <h6 class="text-light text-uppercase ls-1 mb-1">Stažení dat</h6>
-                      <p><a :href="urlData" target="_blank">Hodnoty pro vybraný den (SSV)</a></p>
+                      <p><a class="text-light" :href="urlData" target="_blank">Hodnoty pro vybraný den (SSV)</a></p>
+                      <p><a class="text-light" :href="urlDataMonth" target="_blank">Hodnoty pro celý měsíc (ZIP/SSV)</a></p>
                     </div>
                   </div>
                 </card>
@@ -148,18 +149,10 @@
     },
     computed: {
       urlData: function() {
-        let date = this.currentDate;
-        let year = date.split('-')[0];
-        let month = parseInt(date.split('-')[1]);
-        let day = parseInt(date.split('-')[2]);
-        if (month < 10) {
-          month = '0' + month;
-        }
-        if (day < 10) {
-          day = '0' + day;
-        }
-        let sensorTitle = this.sensors[this.activeSensorId].title;
-        return this.$store.state.serviceUrl + "th" + sensorTitle + "/" + year + "/" + month + "/" + day + "/data.csv"
+        return this.getDownloadUrl('day')
+      },
+      urlDataMonth: function() {
+        return this.getDownloadUrl('month')
       },
       // a computed getter
       dateSliderRangeComputed: function () {
@@ -220,6 +213,26 @@
       }
     },
     methods: {
+      getDownloadUrl(type) {
+        let date = this.currentDate;
+        let year = date.split('-')[0];
+        let month = parseInt(date.split('-')[1]);
+        let day = parseInt(date.split('-')[2]);
+        if (month < 10) {
+          month = '0' + month;
+        }
+        if (day < 10) {
+          day = '0' + day;
+        }
+        let sensorTitle = this.sensors[this.activeSensorId].title;
+        if (type == 'day') {
+          return this.$store.state.serviceUrl + "th" + sensorTitle + "/" + year + "/" + month + "/" + day + "/data.csv"
+        }
+        if (type == 'month') {
+          return this.$store.state.serviceUrl + "th" + sensorTitle + "/" + year + "/" + month + "/data.zip"
+        }
+        return this.$store.state.serviceUrl + "th" + sensorTitle + "/" + year + "/" + month + "/data.zip"
+      },
       getStartMonth() {
         let yesterday = new Date(new Date().setDate(new Date().getDate()-1));
         // console.log(yesterday.getMonth() + 1);
