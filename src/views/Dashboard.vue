@@ -25,28 +25,30 @@
                       :key="sliderkey"
                   />
                   <div>
-                    <b-button class="m-1" size="sm" @click="setMonth(2)">Únor</b-button>
+<!--                    <b-button class="m-1" size="sm" @click="setMonth(2)">Únor</b-button>-->
                     <b-button class="m-1" size="sm" @click="setMonth(3)">Březen</b-button>
                     <b-button class="m-1" size="sm" @click="setMonth(4)">Duben</b-button>
                     <b-button class="m-1" size="sm" @click="setMonth(5)">Květen</b-button>
                     <b-button class="m-1" size="sm" @click="setMonth(6)">Červen</b-button>
+                    <b-button class="m-1" size="sm" @click="setMonth(7)">Červenec</b-button>
                   </div>
                 </card>
               </div>
 
             </div>
-            <div class="row">
-              <div class="col-xl-12 mb-12 mb-xl-0">
-                <p>&nbsp;</p>
-              </div>
-            </div>
-            <div class="row">
+  <!--            <div class="row">-->
+  <!--              <div class="col-xl-12 mb-12 mb-xl-0">-->
+  <!--                <p>&nbsp;</p>-->
+  <!--              </div>-->
+  <!--            </div>-->
+            <div class="row mt-2">
               <div class="col-xl-12 mb-12 mb-xl-0">
                 <card type="default" header-classes="bg-transparent">
                   <div slot="header" class="row align-items-center">
                     <div class="col">
-                      <h6 class="text-light text-uppercase ls-1 mb-1">Teplota</h6>
-                      <h5 class="h3 text-white mb-0">Hodnoty pro {{currentDate}}</h5>
+                      <h5 class="text-light text-uppercase ls-1 mb-1">Teplota</h5>
+                      <h6 class="text-white mb-0">Hodnoty pro {{currentDate}}</h6>
+                      <h6 class="text-light text-uppercase ls-1 mb-1">Min: {{activeSensor.measured_min}}°C, Max: {{activeSensor.measured_max}}°C</h6>
                     </div>
                   </div>
                   <line-chart
@@ -59,9 +61,31 @@
 
                 </card>
               </div>
-
             </div>
-            <div class="row">
+
+            <div class="row mt-2">
+              <div class="col-xl-12 mb-12 mb-xl-0">
+                <card type="default" header-classes="bg-transparent">
+                  <div slot="header" class="row align-items-center">
+                    <div class="col">
+                      <h5 class="text-light text-uppercase ls-1 mb-1">Vlhkost</h5>
+                      <h6 class="text-white mb-0">Hodnoty pro {{currentDate}}</h6>
+                      <h6 class="text-light text-uppercase ls-1 mb-1">Min: {{activeSensor.humidity_min}}%, Max: {{activeSensor.humidity_max}}%</h6>
+                    </div>
+                  </div>
+                  <line-chart
+                      :height="350"
+                      ref="humidityChart"
+                      :chart-data="humidityChart.chartData"
+                      :extra-options="humidityChart.extraOptions"
+                  >
+                  </line-chart>
+
+                </card>
+              </div>
+            </div>
+
+            <div class="row mt-2">
               <div class="col-xl-12 mb-12 mb-xl-0">
                 <card type="default" header-classes="bg-transparent">
                   <div slot="header" class="row align-items-center">
@@ -139,6 +163,13 @@
           extraOptions: chartConfigs.blueChartOptions,
         },
         measuredChart: {
+          chartData: {
+            datasets: [],
+            labels: [],
+          },
+          extraOptions: chartConfigs.blueChartOptions,
+        },
+        humidityChart: {
           chartData: {
             datasets: [],
             labels: [],
@@ -315,13 +346,25 @@
         let chartData = {
           datasets: [
             {
-              label: 'Temperature',
+              label: 'Teplota',
               data: this.activeSensor.measured
             }
           ],
           labels: this.activeSensor.times,
         };
         this.measuredChart.chartData = chartData;
+      },
+      initHumidityChart() {
+        let chartData = {
+          datasets: [
+            {
+              label: 'Vlhkost',
+              data: this.activeSensor.humidity
+            }
+          ],
+          labels: this.activeSensor.times,
+        };
+        this.humidityChart.chartData = chartData;
       },
       changeTimeLevel() {
         if (this.timeLevelSlider !== this.timeLevelSliderBefore) {
@@ -363,6 +406,17 @@
           this.getSensors(this.currentDate);
         }
       },
+      cleanTheGraphs() {
+        this.activeSensor.humidity_min = 'NaN';
+        this.activeSensor.humidity_max = 'NaN';
+        this.activeSensor.measured_min = 'NaN';
+        this.activeSensor.measured_max = 'NaN';
+        this.activeSensor.humidity = [];
+        this.activeSensor.measured = [];
+        this.activeSensor.times = [];
+        this.initMeasuredChart();
+        this.initHumidityChart();
+      },
       getSensors(date) {
         var current_component = this;
         // console.log(date);
@@ -386,63 +440,44 @@
             // console.log(response.data);
             let rows = response.data.split('\n');
             let measured = [];
+            let humidity = [];
             let times = [];
             let i = 0;
             for (i = 0; i < (rows.length - 1); i++) {
+              humidity.push(rows[i].split(';')[0])
               measured.push(rows[i].split(';')[1])
               times.push(rows[i].split(';')[3].split(' ')[1].substr(0, 5))
             }
+            current_component.activeSensor.humidity_min = Math.min.apply(Math, humidity);
+            current_component.activeSensor.humidity_max = Math.max.apply(Math, humidity);
+            current_component.activeSensor.humidity = humidity;
             current_component.activeSensor.measured = measured;
+            current_component.activeSensor.measured_min = Math.min.apply(Math, measured);
+            current_component.activeSensor.measured_max = Math.max.apply(Math, measured);
             current_component.activeSensor.times = times;
-            // current_component.sensors = response.data.sensors;
-            // current_component.activeSensor = current_component.sensors[current_component.activeSensorId];
-            // current_component.$root.$emit(
-            //     "sensorChanged",
-            //     current_component.activeSensor
-            // );
             current_component.$root.$emit("sensorsListChanged", current_component.sensors);
-            // //current_component.initDistancesErrorChart();
             current_component.initMeasuredChart();
+            current_component.initHumidityChart();
             if (current_component.activeSensor.measured.length < 1) {
               current_component.error = "Pro vybraný den nemám data.";
-              current_component.activeSensor.measured = [];
-              current_component.activeSensor.times = [];
-              current_component.initMeasuredChart();
+              current_component.cleanTheGraphs();
             } else {
               current_component.error = null;
             }
 
           } else {
-            // alert(response.data.error);
-            // current_component.error = response.data.error;
             current_component.error = "Pro vybraný den nemám data.";
-            current_component.activeSensor.measured = [];
-            current_component.activeSensor.times = [];
-            current_component.initMeasuredChart();
+            current_component.cleanTheGraphs();
           }
         })
         .catch(function (error) {
-          // console.log(error);
-          // current_component.error = error;
-          // let a = error;
           current_component.error = "Pro vybraný den nemám data: " + error;
-          current_component.activeSensor.measured = [];
-          current_component.activeSensor.times = [];
-          current_component.initMeasuredChart();
+          current_component.cleanTheGraphs();
         });
       },
       switchToSensor(index) {
         this.activeSensorId = index;
         this.getSensors(this.currentDate);
-        // this.activeSensor = this.sensors[index];
-        // if (this.activeSensor.measured.length < 1) {
-        //   this.error = "There are no data for selected time.";
-        // } else {
-        //   this.error = null;
-        // }
-        // // this.initDistancesErrorChart();
-        // this.initMeasuredChart();
-        // //console.log("STS", this.activeSensor);
       }
     },
     mounted() {
