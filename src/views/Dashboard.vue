@@ -31,6 +31,11 @@
                     <b-button class="m-1" size="sm" @click="setMonth(5)">Květen</b-button>
                     <b-button class="m-1" size="sm" @click="setMonth(6)">Červen</b-button>
                     <b-button class="m-1" size="sm" @click="setMonth(7)">Červenec</b-button>
+                    <b-button class="m-1" size="sm" @click="setMonth(8)">Srpen</b-button>
+                    <b-button v-if="(new Date()).getMonth() > 7" class="m-1" size="sm" @click="setMonth(9)">Září</b-button>
+                    <b-button v-if="(new Date()).getMonth() > 8" class="m-1" size="sm" @click="setMonth(10)">Říjen</b-button>
+                    <b-button v-if="(new Date()).getMonth() > 9" class="m-1" size="sm" @click="setMonth(11)">Listopad</b-button>
+                    <b-button v-if="(new Date()).getMonth() > 10" class="m-1" size="sm" @click="setMonth(12)">Prosinec</b-button>
                   </div>
                 </card>
               </div>
